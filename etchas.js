@@ -1,10 +1,10 @@
 //numero y tamano de los cuadrados del sketch
-const promptNumber =prompt("numero de cuadrados", "1");
+const promptNumber = prompt("numero de cuadrados(maximo 100)", "1");
 let squareNumber = null;
-if (!isNaN(promptNumber)){
-squareNumber= Number(promptNumber);
+if (!isNaN(promptNumber) && (promptNumber <= 100)) {
+    squareNumber = Number(promptNumber);
 }
-else squareNumber= 16;
+else squareNumber = 16;
 const squareSize = 100;
 const gridSize = 960;
 
@@ -23,13 +23,12 @@ drawEtch();
 function drawEtch() {
 
     const gridDiv = document.createElement("gridDiv");
-    gridDiv.id="gridDiv";
+    gridDiv.id = "gridDiv";
     gridDiv.style.display = "grid";
-    gridDiv.style.width= gridSize + "px"
-    gridDiv.style.height= gridSize + "px"
-    gridDiv.style.setProperty('grid-template-columns', 'repeat(' + squareNumber + ', ' + gridSize/squareNumber + 'px)');
-    gridDiv.style.setProperty('grid-template-rows', 'repeat(' + squareNumber + ',' + gridSize/squareNumber + 'px)');
-
+    gridDiv.style.width = gridSize + "px"
+    gridDiv.style.height = gridSize + "px"
+    gridDiv.style.setProperty('grid-template-columns', 'repeat(' + squareNumber + ', ' + gridSize / squareNumber + 'px)');
+    gridDiv.style.setProperty('grid-template-rows', 'repeat(' + squareNumber + ',' + gridSize / squareNumber + 'px)');
     for (let a = 1; a <= squareNumber; a++) {
         for (let b = 1; b <= squareNumber; b++) {
 
@@ -38,25 +37,25 @@ function drawEtch() {
             divItem.style.gridColumn = a + "/" + (a + 1);
             divItem.style.gridRow = b + "/" + (b + 1);
             divItem.className = "" + a + b;
+            divItem.dataset.brightness = 100;
             divItemChange(divItem, false);
-
             bordersChange(a, b, divItem);
             let trail = [];
 
             //evento de la entrada para cambiar el  color del cuadrado
             divItem.addEventListener("mouseenter", function (event) {
                 divItemChange(this, true);
-                console.log(event);
                 this.style.display = "grid";
-                const trailItem = document.createElement("div")
-                console.log(divItem.clientWidth)
+                const trailItem = document.createElement("div");
                 this.style.setProperty('grid-template-columns', 'repeat(' + divItem.clientWidth + ', 1px)');
                 this.style.setProperty('grid-template-rows', 'repeat(' + divItem.clientHeight + ', 1px)');
-                trailItem.style.gridRow = (event.offsetY) + "/" + (event.offsetY + 1);
-                trailItem.style.gridColumn = (event.offsetX) + "/" + (event.offsetX + 1);
-                trailItem.style.background = "black";
-                trailItem.className = "" + a + b;
-                trail.push(trailItem);
+                if (event.offsetX > 0 && event.offsetY > 0) {
+                    trailItem.style.gridRow = (event.offsetY) + "/" + (event.offsetY + 1);
+                    trailItem.style.gridColumn = (event.offsetX) + "/" + (event.offsetX + 1);
+                    trailItem.style.background = "black";
+                    trailItem.className = "" + a + b;
+                    trail.push(trailItem);
+                }
             });
 
             //evento del movimiento del raton que va mostrando la cola del mouse
@@ -64,12 +63,14 @@ function drawEtch() {
                 trail.forEach(element => {
                     this.appendChild(element);
                 });
+                if (event.offsetX > 0 && event.offsetY > 0) {
                 const trailItem = document.createElement("div");
                 trailItem.style.gridRow = (event.offsetY) + "/" + (event.offsetY + 1);
                 trailItem.style.gridColumn = (event.offsetX) + "/" + (event.offsetX + 1);
                 trailItem.style.background = "black";
                 trailItem.className = "" + event.offsetX + event.offsetY;
                 trail.push(trailItem);
+                }
             })
 
             divItem.addEventListener("mouseleave", function (event) {
@@ -87,6 +88,11 @@ function divItemChange(divChange, random) {
     if (random) {
         let randomColor = Math.floor(Math.random() * 16777215).toString(16);
         divChange.style.background = "#" + randomColor;
+        let bright=divChange.dataset.brightness;
+        if(bright>0){
+        divChange.dataset.brightness = bright-10;
+        divChange.style.filter = `brightness(${divChange.dataset.brightness}%`;
+        }
     }
     else divChange.style.background = "black";
 }
@@ -111,7 +117,7 @@ function bordersChange(a, b, div) {
     }
 }
 
-function resetTable(){
-    let div  = document.getElementById("gridDiv");
-        div.parentNode.removeChild(div);
+function resetTable() {
+    let div = document.getElementById("gridDiv");
+    div.parentNode.removeChild(div);
 }
